@@ -1,0 +1,5 @@
+﻿nodeLinker: hoisted
+allowBuilds:
+  esbuild@0.28.2: true
+  protobufjs@7.6.6: false
+  dtrace-provider@0.8.8: false
