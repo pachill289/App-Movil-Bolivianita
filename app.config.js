@@ -12,5 +12,7 @@ module.exports = {
   ios: { supportsTablet: true, bundleIdentifier: 'com.gemasmeyer.bolivianitainventario', config: { usesNonExemptEncryption: false } },
   android: { package: 'com.gemasmeyer.bolivianitainventario', blockedPermissions: ['android.permission.RECORD_AUDIO'] },
   plugins: [['expo-camera', { cameraPermission: 'Permite usar la cámara para escanear certificados de joyería.', recordAudioAndroid: false }], 'expo-secure-store', 'expo-font'],
-  extra: { supabaseUrl: url, supabaseAnonKey: key },
+  extra: { eas: {
+      projectId: "387cadf9-24f7-4e35-be75-3567bfa73959"
+    }, supabaseUrl: url, supabaseAnonKey: key },
 };
