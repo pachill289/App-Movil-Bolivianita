@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Action, colors, s } from './ui';
 import { PAYMENT_METHODS, type PaymentMethod } from './payments';
 import { money, type Candidate } from './api';
+import { transactionLabels } from './transactionLabels';
 
 type Props = {
+  role: 'admin' | 'collaborator';
   visible: boolean;
   product: Candidate | null;
   selected: PaymentMethod | null;
@@ -15,16 +17,17 @@ type Props = {
   onClose: () => void;
   onConfirm: () => void;
 };
-export function PaymentModal({ visible, product, selected, busy, legacyPending, onSelect, onClose, onConfirm }: Props) {
+export function PaymentModal({ role, visible, product, selected, busy, legacyPending, onSelect, onClose, onConfirm }: Props) {
+  const labels = transactionLabels(role);
   return <Modal visible={visible} transparent animationType="fade" onRequestClose={() => { if (!busy) onClose(); }}>
     <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(35,18,34,0.6)' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
         <View accessibilityViewIsModal style={[s.card, { width: '100%', maxWidth: 480, alignSelf: 'center' }]}>
-          <Text style={s.eyebrow}>COMPRA · 1 UNIDAD</Text>
+          <Text style={s.eyebrow}>{labels.noun.toUpperCase()} · 1 UNIDAD</Text>
           <Text accessibilityRole="header" style={s.title}>Tipo de pago</Text>
           <Text style={s.productName}>{product?.description}</Text>
           <Text style={s.price}>{money(product?.price ?? 0)}</Text>
-          <Text style={s.text}>Selecciona cómo se realiza el pago para confirmar la compra.</Text>
+          <Text style={s.text}>Selecciona cómo se realiza el pago para confirmar la {labels.noun}.</Text>
           {legacyPending ? <Text style={s.text}>Hay una operación pendiente de la versión anterior. Se comprobará su resultado antes de descontar stock.</Text> : null}
           <View accessibilityRole="radiogroup" accessibilityLabel="Tipo de pago obligatorio" style={{ gap: 10 }}>
             {PAYMENT_METHODS.map(method => <Pressable key={method.value} accessibilityRole="radio"
@@ -39,7 +42,7 @@ export function PaymentModal({ visible, product, selected, busy, legacyPending, 
               <Text style={[s.productName, { flex: 1, fontSize: 15 }]}>{method.label}</Text>
             </Pressable>)}
           </View>
-          <Action title={busy ? 'Registrando compra…' : 'Comprar'} busy={busy} disabled={!selected} onPress={onConfirm} />
+          <Action title={busy ? labels.progress : labels.action} busy={busy} disabled={!selected} onPress={onConfirm} />
           <Action title="Cancelar" secondary disabled={busy} onPress={onClose} />
         </View>
       </ScrollView>

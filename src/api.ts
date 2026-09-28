@@ -25,10 +25,12 @@ export const supabase = createClient(extra!.supabaseUrl, extra!.supabaseAnonKey,
 export type Product = {
     id: string;
     description: string;
-    price: number;
+    price: number | null;
     stock: number;
+    has_certificate?: boolean;
 };
 export type Candidate = Product & {
+    price: number;
     barcode: string;
     image: string;
     version: number;
@@ -54,7 +56,7 @@ export type Receipt = {
 export async function inventory(): Promise<Product[]> {
     const rows: Product[] = [];
     for (let offset = 0;; offset += 500) {
-        const { data, error } = await supabase.from('jewelry_products').select('id,description,price,stock').order('id').range(offset, offset + 499);
+        const { data, error } = await supabase.rpc('list_jewelry_inventory', { p_offset: offset, p_limit: 500 });
         if (error)
             throw error;
         rows.push(...data);

@@ -3,7 +3,7 @@
 ## Flujo de la app
 
 1. Escanear el certificado y consultar la joya.
-2. Pulsar **Comprar** abre una ventana emergente.
+2. Pulsar **Comprar joya** (cliente) o **Vender joya** (administrador) abre una ventana emergente.
 3. Seleccionar **Efectivo**, **QR**, **Tarjeta de crédito** o **Transferencia bancaria**. No hay selección predeterminada.
 4. Pulsar **Comprar** en la ventana registra una unidad y descuenta el stock. Cancelar no modifica nada.
 5. Se muestra comprobante, tipo de pago, total, fecha en Bolivia y stock después de esa compra.
@@ -24,7 +24,7 @@ select id from auth.users where email = 'CORREO_DEL_VENDEDOR'
 on conflict do nothing;
 ```
 
-No habilitar usuarios ajenos al personal del inventario. Los clientes no pueden insertar, editar ni borrar registros de ventas directamente; la RPC comprueba los permisos y el stock.
+La migración compartida `20260924020000_customer_purchases.sql` permite comprar a todo perfil colaborador sin añadirlo a `mobile_sales_staff`; esta lista se conserva para autorizar a los administradores vendedores. Los clientes no pueden insertar, editar ni borrar registros de ventas directamente; la RPC comprueba los permisos y el stock.
 
 ## Tabla `public.jewelry_mobile_sales`
 
@@ -51,7 +51,7 @@ La vista `public.jewelry_sales_export` expone `sale_id`, `product_id`, `seller_i
 
 `SELECT * FROM public.jewelry_sales_export ORDER BY sold_at_utc, sale_id;`
 
-La vista respeta RLS: cada usuario autenticado sólo ve sus propias ventas. Una integración futura debe ejecutarse en un servidor autorizado y usar `sale_id` para no duplicar filas en Sheets. No se ha conectado Google Sheets ni añadido credenciales de Google a la app.
+La vista respeta RLS: los reportes y la lectura directa de ventas están reservados a administradores según la migración web 2.0. Un cliente recibe únicamente su comprobante mediante la RPC de compra. Una integración futura debe ejecutarse en un servidor autorizado y usar `sale_id` para no duplicar filas en Sheets. No se ha conectado Google Sheets ni añadido credenciales de Google a la app.
 
 ## Validación
 
