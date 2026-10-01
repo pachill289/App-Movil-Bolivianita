@@ -5,7 +5,7 @@ import { supabase } from './api';
 import { authenticate, emptyAuthValues, validateAuth, type AuthValues } from './auth';
 import { Action, Brand, Notice, colors, s } from './ui';
 
-export function AuthScreen() {
+export function AuthScreen({ onScanQR }: { onScanQR: () => void }) {
     const [register, setRegister] = useState(false);
     const [values, setValues] = useState({ ...emptyAuthValues });
     const [touched, setTouched] = useState<Partial<Record<keyof AuthValues, boolean>>>({});
@@ -62,6 +62,7 @@ export function AuthScreen() {
                     <Action title={register ? 'Volver a ingresar' : 'Crear usuario'} secondary disabled={busy} onPress={() => {
                         setRegister(!register); setValues({ ...emptyAuthValues, username: values.username }); setTouched({}); setError(''); setShow(false);
                     }} />
+                    <Action title="Escanear Joya por QR" secondary disabled={busy} onPress={onScanQR} />
                     <Text style={[s.text, { fontSize: 11, textAlign: 'center' }]}>GEMAS MEYER · INVENTARIO MÓVIL</Text>
                 </View>
             </ScrollView>

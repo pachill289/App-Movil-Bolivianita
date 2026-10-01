@@ -7,7 +7,7 @@ import { money, type Candidate } from './api';
 import { transactionLabels } from './transactionLabels';
 
 type Props = {
-  role: 'admin' | 'collaborator';
+  role: 'admin' | 'collaborator' | 'seller';
   visible: boolean;
   product: Candidate | null;
   selected: PaymentMethod | null;

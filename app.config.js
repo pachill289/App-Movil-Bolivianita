@@ -6,6 +6,13 @@ if (!url.startsWith('https://')) throw new Error('Supabase requiere HTTPS');
 let role;
 try { role = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role; } catch {}
 if (key.startsWith('sb_secret_') || (role && role !== 'anon')) throw new Error('Usa únicamente una clave anon/publishable');
+const certificateBaseUrl = process.env.VITE_CERTIFICATE_BASE_URL?.trim();
+if (certificateBaseUrl) {
+  const origin = new URL(certificateBaseUrl);
+  if (origin.protocol !== 'https:' || origin.username || origin.password || origin.search || origin.hash || origin.pathname !== '/') {
+    throw new Error('VITE_CERTIFICATE_BASE_URL debe ser el origen HTTPS del inventario, sin rutas ni credenciales');
+  }
+}
 module.exports = {
   name: 'Bolivianita Inventario', slug: 'bolivianita-inventario', version: '1.0.0',
   platforms: ['ios', 'android'], scheme: 'bolivianita', orientation: 'default', userInterfaceStyle: 'light',
@@ -14,5 +21,5 @@ module.exports = {
   plugins: [['expo-camera', { cameraPermission: 'Permite usar la cámara para escanear certificados de joyería.', recordAudioAndroid: false }], 'expo-secure-store', 'expo-font'],
   extra: { eas: {
       projectId: "387cadf9-24f7-4e35-be75-3567bfa73959"
-    }, supabaseUrl: url, supabaseAnonKey: key },
+    }, supabaseUrl: url, supabaseAnonKey: key, certificateBaseUrl: certificateBaseUrl || undefined },
 };

@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type AuthValues = { username: string; password: string; confirm: string; first_name: string; last_name: string; phone: string };
+export type AuthValues = { role?: 'collaborator' | 'seller'; username: string; password: string; confirm: string; first_name: string; last_name: string; phone: string };
 export type AuthErrors = Partial<Record<keyof AuthValues, string>>;
-export const emptyAuthValues: AuthValues = { username: '', password: '', confirm: '', first_name: '', last_name: '', phone: '' };
+export const emptyAuthValues: AuthValues = { role: 'collaborator', username: '', password: '', confirm: '', first_name: '', last_name: '', phone: '' };
 export const normalizePhone = (value: string) => value.replace(/[\s()-]/g, '').replace(/^\+591/, '');
 // Count UTF-8 bytes without depending on TextEncoder in native runtimes.
 export const utf8Length = (value: string) => Array.from(value).reduce((length, char) => {

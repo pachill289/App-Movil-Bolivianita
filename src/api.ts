@@ -1,3 +1,5 @@
+import { lookupTarget } from './lookup';
+import type { ScanTarget } from './scan';
 import Constants from 'expo-constants';
 import { createClient, processLock } from '@supabase/supabase-js';
 import { secureStorage } from './secureStorage';
@@ -34,6 +36,7 @@ export type Candidate = Product & {
     barcode: string;
     image: string;
     version: number;
+    qrValue?: string;
 };
 export type PendingSale = {
     requestId: string;
@@ -64,14 +67,8 @@ export async function inventory(): Promise<Product[]> {
             return rows;
     }
 }
-export async function lookup(id: string): Promise<Candidate> {
-    const { data: certificate, error } = await supabase.from('jewelry_certificates').select('jewelry_id,barcode_value,image_path,version').eq('jewelry_id', id).single();
-    if (error || !certificate)
-        throw new Error('No se encontró un certificado accesible para esta joya.');
-    const { data: product, error: productError } = await supabase.from('jewelry_products').select('id,description,price,stock').eq('id', id).single();
-    if (productError || !product)
-        throw new Error('No se pudo consultar el producto. Revisa tu conexión y tus permisos.');
-    return { ...product, barcode: certificate.barcode_value, version: certificate.version, image: supabase.storage.from('certificate-images').getPublicUrl(certificate.image_path).data.publicUrl };
+export async function lookup(target: ScanTarget): Promise<Candidate> {
+    return lookupTarget(supabase, target);
 }
 export async function sell(sale: PendingSale): Promise<Receipt> {
     if (!isPaymentMethod(sale.paymentMethod)) throw new Error('Selecciona un tipo de pago válido.');

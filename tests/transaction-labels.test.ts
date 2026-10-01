@@ -8,3 +8,8 @@ test('QR action and confirmation use the persisted role', () => {
     assert.match(admin.success, /^Venta/);
     assert.match(client.success, /^Compra/);
 });
+
+test('seller receives the same sale actions as administrator', () => {
+ assert.deepEqual(transactionLabels('seller'), transactionLabels('admin'));
+ assert.equal(transactionLabels('seller').tab, 'Venta por QR');
+});

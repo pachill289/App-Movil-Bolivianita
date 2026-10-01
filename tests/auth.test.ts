@@ -15,7 +15,7 @@ function fixture(response: any = { data: { session: tokens }, error: null }, ses
 
 test('registration sends normalized profile data to the shared function and installs session tokens', async () => {
     const { client, calls } = fixture();
-    await authenticate(client, { ...valid, role: 'admin', email: 'ignored@example.com' } as AuthValues, true);
+    await authenticate(client, { ...valid, role: 'admin', email: 'ignored@example.com' } as unknown as AuthValues, true);
     assert.deepEqual(calls, [
         ['username-auth', { body: { action: 'register', username: 'raul.perez', password: valid.password, first_name: 'Raúl', last_name: 'Pérez', phone: '+59171234567' } }],
         ['session', tokens],
@@ -50,4 +50,10 @@ test('service messages survive HTTP failures; network and malformed responses do
     }
     const storageFailure = fixture(undefined, new Error('storage'));
     await assert.rejects(authenticate(storageFailure.client, valid, false), /guardar la sesión/);
+});
+
+test('public registration does not forward privileged roles', async () => {
+ const { client, calls } = fixture();
+ await authenticate(client, { ...valid, role: 'seller' }, true);
+ assert.equal(calls[0][1].body.role, undefined);
 });

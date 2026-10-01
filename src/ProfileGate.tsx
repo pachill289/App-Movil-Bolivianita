@@ -4,7 +4,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from './api';
 import { Action, Brand, Notice, colors, s } from './ui';
 
-export type Profile = { username: string; role: 'admin' | 'collaborator' };
+export type Profile = { username: string; role: 'admin' | 'collaborator' | 'seller' };
 export function ProfileGate({ session, children }: { session: Session; children: (profile: Profile) => React.ReactNode }) {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [error, setError] = useState(''), [attempt, setAttempt] = useState(0), [busy, setBusy] = useState(false);
@@ -14,7 +14,7 @@ export function ProfileGate({ session, children }: { session: Session; children:
         void (async () => {
             try {
                 const { data, error } = await supabase.from('jewelry_profiles').select('username,role').eq('id', session.user.id).single();
-                if (error || !data || !data.username || !['admin', 'collaborator'].includes(data.role)) throw new Error();
+                if (error || !data || !data.username || !['admin', 'collaborator', 'seller'].includes(data.role)) throw new Error();
                 if (mounted) setProfile(data as Profile);
             } catch {
                 if (mounted) setError('No se pudo cargar tu perfil. Revisa tu conexión o contacta al administrador.');

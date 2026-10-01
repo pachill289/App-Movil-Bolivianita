@@ -1,5 +1,5 @@
-export function transactionLabels(role: 'admin' | 'collaborator') {
-    const admin = role === 'admin';
+export function transactionLabels(role: 'admin' | 'collaborator' | 'seller') {
+    const admin = role === 'admin' || role === 'seller';
     return {
         action: admin ? 'Vender joya' : 'Comprar joya',
         tab: admin ? 'Venta por QR' : 'Compra por QR',

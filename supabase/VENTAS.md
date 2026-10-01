@@ -3,7 +3,7 @@
 ## Flujo de la app
 
 1. Escanear el certificado y consultar la joya.
-2. Pulsar **Comprar joya** (cliente) o **Vender joya** (administrador) abre una ventana emergente.
+2. Pulsar **Comprar joya** (cliente) o **Vender joya** (administrador/vendedor) abre una ventana emergente.
 3. Seleccionar **Efectivo**, **QR**, **Tarjeta de crédito** o **Transferencia bancaria**. No hay selección predeterminada.
 4. Pulsar **Comprar** en la ventana registra una unidad y descuenta el stock. Cancelar no modifica nada.
 5. Se muestra comprobante, tipo de pago, total, fecha en Bolivia y stock después de esa compra.
@@ -16,15 +16,9 @@ El tipo de pago se registra como dato de la operación; no se integra una pasare
 
 Aplicada el 18/09/2026 al proyecto configurado en `.env` mediante SQL Editor; cuenta existente autorizada en `mobile_sales_staff`. No se realizaron compras reales durante el despliegue.
 
-Para autorizar otra cuenta existente, el administrador ejecuta:
+La migración `20260928020000_mobile_seller_sales.sql`, posterior a las migraciones web de perfiles y vendedor, autoriza por el rol persistido: colaborador compra; administrador y vendedor venden. Ya no requiere `mobile_sales_staff`. Los clientes no pueden insertar, editar ni borrar registros directamente: usan la RPC que valida certificado, precio, versión y stock.
 
-```sql
-insert into public.mobile_sales_staff(user_id)
-select id from auth.users where email = 'CORREO_DEL_VENDEDOR'
-on conflict do nothing;
-```
-
-La migración compartida `20260924020000_customer_purchases.sql` permite comprar a todo perfil colaborador sin añadirlo a `mobile_sales_staff`; esta lista se conserva para autorizar a los administradores vendedores. Los clientes no pueden insertar, editar ni borrar registros de ventas directamente; la RPC comprueba los permisos y el stock.
+El QR abre el certificado completo; CODE128 abre la ficha de inventario. Ambos confirman una sola unidad mediante la misma transacción.
 
 ## Tabla `public.jewelry_mobile_sales`
 
