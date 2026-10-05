@@ -15,9 +15,17 @@ if (certificateBaseUrl) {
 }
 module.exports = {
   name: 'Bolivianita Inventario', slug: 'bolivianita-inventario', version: '1.0.0',
+  icon: './assets/branding/icon.png',
   platforms: ['ios', 'android'], scheme: 'bolivianita', orientation: 'default', userInterfaceStyle: 'light',
   ios: { supportsTablet: true, bundleIdentifier: 'com.gemasmeyer.bolivianitainventario', config: { usesNonExemptEncryption: false } },
-  android: { package: 'com.gemasmeyer.bolivianitainventario', blockedPermissions: ['android.permission.RECORD_AUDIO'] },
+  android: { package: 'com.gemasmeyer.bolivianitainventario', blockedPermissions: ['android.permission.RECORD_AUDIO'],
+    adaptiveIcon: {
+      foregroundImage: './assets/branding/adaptive-foreground.png',
+      backgroundImage: './assets/branding/adaptive-background.png',
+      monochromeImage: './assets/branding/adaptive-monochrome.png',
+      backgroundColor: '#5d2057',
+    },
+  },
   plugins: [['expo-camera', { cameraPermission: 'Permite usar la cámara para escanear certificados de joyería.', recordAudioAndroid: false }], 'expo-secure-store', 'expo-font'],
   extra: { eas: {
       projectId: "387cadf9-24f7-4e35-be75-3567bfa73959"
