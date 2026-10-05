@@ -49,6 +49,8 @@ export type Receipt = {
     jewelry_id: string;
     stock_after: number;
     unit_price: number;
+    gross_unit_price?: number | null;
+    card_fee_amount?: number;
     created_at: string;
     description: string;
     quantity: number;

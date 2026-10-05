@@ -5,6 +5,7 @@ import { Action, colors, s } from './ui';
 import { PAYMENT_METHODS, type PaymentMethod } from './payments';
 import { money, type Candidate } from './api';
 import { transactionLabels } from './transactionLabels';
+import { saleAmounts } from './saleAmounts';
 
 type Props = {
   role: 'admin' | 'collaborator' | 'seller';
@@ -19,6 +20,7 @@ type Props = {
 };
 export function PaymentModal({ role, visible, product, selected, busy, legacyPending, onSelect, onClose, onConfirm }: Props) {
   const labels = transactionLabels(role);
+  const amounts = saleAmounts(product?.price ?? 0, selected, role);
   return <Modal visible={visible} transparent animationType="fade" onRequestClose={() => { if (!busy) onClose(); }}>
     <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(35,18,34,0.6)' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
@@ -42,6 +44,7 @@ export function PaymentModal({ role, visible, product, selected, busy, legacyPen
               <Text style={[s.productName, { flex: 1, fontSize: 15 }]}>{method.label}</Text>
             </Pressable>)}
           </View>
+          {amounts?.applies ? <Text style={s.text}>Monto original: {money(amounts.gross)} · Deducción por tarjeta (1,5 %): {money(amounts.fee)} · Monto unitario neto a registrar: {money(amounts.net)}</Text> : null}
           <Action title={busy ? labels.progress : labels.action} busy={busy} disabled={!selected} onPress={onConfirm} />
           <Action title="Cancelar" secondary disabled={busy} onPress={onClose} />
         </View>

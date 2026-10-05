@@ -4,6 +4,8 @@ Aplicación independiente React Native, Expo y TypeScript, gestionada con pnpm. 
 
 ## Ejecutar
 
+Las nuevas ventas de admin/vendedor con tarjeta de crédito guardan el monto unitario menos 1,5 %, redondeado a dos decimales en Supabase. La confirmación y el comprobante muestran el original, la deducción y el neto. Las compras del cliente y otros medios de pago conservan su monto. Se envía siempre el precio original para verificar el catálogo y reintentar sin duplicar operaciones. El backend compartido ya incluye la migración web `20261005020000_credit_card_net_sales.sql`; reinstalar una nueva APK para ver el desglose actualizado.
+
 El icono de la aplicación reproduce el rombo y el degradado del login. `assets/branding/icon.png` es el icono de 1024 × 1024 para iOS y Android; las capas `adaptive-*` permiten recortes del launcher y el icono temático Android. Están configurados en `app.config.js`. Para ver el icono del launcher hay que generar e instalar una nueva APK; recargar Expo Go no cambia el icono de Expo Go. El perfil EAS `preview` ya genera APK.
 
 Para regenerar los archivos con Python y Pillow: `python scripts/generate-brand-icons.py --web-public "../sistema_inventario_bolivianita_vercel/public"`. También genera los favicons web y el icono Apple touch con el mismo diseño.
