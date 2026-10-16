@@ -78,6 +78,18 @@ La actualización de acceso pasó la comprobación TypeScript, las pruebas autom
 
 ## Builds
 
+## Sucursales y conteo de inventario (16/10/2026)
+
+El login permite elegir sucursal y el inventario permite cambiar entre las autorizadas. La sucursal inicial es **Joyería Bolivianita La Paz**. Los administradores acceden a todas; vendedores y colaboradores requieren asignación administrativa. El inventario se consulta en páginas de 15 productos.
+
+Solo el administrador dispone de **Conteo de inventario**. Cada lectura CODE128 suma una unidad, incluso cuando varias unidades comparten código. Tras una lectura con cámara, pulsar **Escanear siguiente** evita contar repetidamente la misma joya. También se puede introducir el código con un lector óptico y Enter. **Deshacer última unidad** permite corregir la última lectura.
+
+El conteo se guarda por administrador y sucursal y se puede retomar. Si una lectura queda sin confirmar por conexión, reintentar la operación pendiente no duplica unidades. **Finalizar conteo** compara con el stock de esa sucursal en ese momento, sin modificarlo. **Productos faltantes** muestra descripción, certificado, cantidad contada, stock y faltantes, con foto y páginas de 15 productos. Se avisa si hubo cambios de stock durante el conteo o si se contaron unidades de más.
+
+Requiere la migración compartida `20261016010000_mobile_inventory_counts.sql` del repositorio web, posterior a la de sucursales. Fue aplicada y comprobada con datos temporales y rollback. Para instalar estas pantallas en Android, generar una nueva APK con `npx eas-cli build -p android --profile preview`. La cámara y el lector deben comprobarse en el dispositivo físico.
+
+### Compilación
+
 ```powershell
 pnpm dlx eas-cli@24.6.0 login
 pnpm dlx eas-cli@24.6.0 init

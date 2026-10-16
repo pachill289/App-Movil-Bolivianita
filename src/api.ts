@@ -1,3 +1,4 @@
+import { selectedBranch } from './branches';
 import { lookupTarget } from './lookup';
 import type { ScanTarget } from './scan';
 import Constants from 'expo-constants';
@@ -13,7 +14,10 @@ const timedFetch: typeof fetch = async (input, init) => {
         controller.abort();
     const timer = setTimeout(abort, 25000);
     try {
-        return await fetch(input, { ...init, signal: controller.signal });
+        const headers = new Headers(init?.headers);
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+        if(url.startsWith(extra!.supabaseUrl+'/rest/v1/') || url.startsWith(extra!.supabaseUrl+'/storage/v1/')) headers.set('x-jewelry-branch',selectedBranch());
+        return await fetch(input, { ...init, headers, signal: controller.signal });
     }
     finally {
         clearTimeout(timer);
@@ -58,16 +62,10 @@ export type Receipt = {
     currency: string;
     total_amount: number;
 };
-export async function inventory(): Promise<Product[]> {
-    const rows: Product[] = [];
-    for (let offset = 0;; offset += 500) {
-        const { data, error } = await supabase.rpc('list_jewelry_inventory', { p_offset: offset, p_limit: 500 });
-        if (error)
-            throw error;
-        rows.push(...data);
-        if (data.length < 500)
-            return rows;
-    }
+export type InventoryPage = { rows: Product[]; count: number; products: number; units: number; empty: number };
+export async function inventory(page=0,search=''): Promise<InventoryPage> {
+ const {data,error}=await supabase.rpc('jewelry_mobile_inventory_page',{p_search:search,p_stock:'all',p_offset:page*15,p_limit:15});
+ if(error)throw error;return data;
 }
 export async function lookup(target: ScanTarget): Promise<Candidate> {
     return lookupTarget(supabase, target);

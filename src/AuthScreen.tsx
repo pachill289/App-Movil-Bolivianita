@@ -1,4 +1,6 @@
-import React, { useRef, useState } from 'react';
+import { BranchPicker } from './BranchPicker';
+import { DEFAULT_BRANCH, selectBranch, type Branch } from './branches';
+import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from './api';
@@ -6,6 +8,8 @@ import { authenticate, emptyAuthValues, validateAuth, type AuthValues } from './
 import { Action, Brand, Notice, colors, s } from './ui';
 
 export function AuthScreen({ onScanQR }: { onScanQR: () => void }) {
+    const [branches,setBranches]=useState<Branch[]>([]),[branch,setBranch]=useState(DEFAULT_BRANCH),[branchError,setBranchError]=useState(''),[branchAttempt,setBranchAttempt]=useState(0);
+    useEffect(()=>{let active=true;setBranchError('');void supabase.rpc('jewelry_login_branches').then(({data,error})=>{if(active){if(error)setBranchError('No se pudieron cargar las sucursales.');else setBranches(data);}});return()=>{active=false;};},[branchAttempt]);
     const [register, setRegister] = useState(false);
     const [values, setValues] = useState({ ...emptyAuthValues });
     const [touched, setTouched] = useState<Partial<Record<keyof AuthValues, boolean>>>({});
@@ -20,6 +24,8 @@ export function AuthScreen({ onScanQR }: { onScanQR: () => void }) {
         guard.current = true;
         setBusy(true);
         try {
+            if(!branches.some(b=>b.id===branch))throw new Error('Selecciona una sucursal disponible.');
+            await selectBranch(branch);
             await authenticate(supabase, values, register);
             setValues({ ...emptyAuthValues });
             setShow(false);
@@ -51,6 +57,8 @@ export function AuthScreen({ onScanQR }: { onScanQR: () => void }) {
                         {field('last_name', 'Apellido', { autoCapitalize: 'words', autoComplete: 'family-name', textContentType: 'familyName' })}
                         {field('phone', 'Teléfono de Bolivia', { keyboardType: 'phone-pad', autoComplete: 'tel', textContentType: 'telephoneNumber' }, 'Ejemplo: +591 71234567')}
                     </> : null}
+                    <BranchPicker branches={branches} value={branch} onChange={setBranch} disabled={busy}/><Text style={s.text}>Solo podrás ingresar a las sucursales asignadas por el administrador.</Text>
+                    {branchError?<><Notice text={branchError}/><Action title="Reintentar sucursales" secondary onPress={()=>setBranchAttempt(v=>v+1)}/></>:null}
                     {field('username', 'Nombre de usuario', { autoCapitalize: 'none', autoComplete: 'username', textContentType: 'username', placeholder: 'nombre.apellido' }, register ? 'De 3 a 40 caracteres: letras sin tildes, números, punto, guion o guion bajo.' : undefined)}
                     {field('password', 'Contraseña', { secureTextEntry: !show, autoCapitalize: 'none', autoComplete: register ? 'new-password' : 'current-password', textContentType: register ? 'newPassword' : 'password', onSubmitEditing: register ? undefined : submit }, register ? 'Mínimo 12 caracteres: mayúscula, minúscula, número y símbolo.' : undefined)}
                     {register ? field('confirm', 'Confirmar contraseña', { secureTextEntry: !show, autoCapitalize: 'none', autoComplete: 'new-password', textContentType: 'newPassword', onSubmitEditing: submit }) : null}
@@ -58,7 +66,7 @@ export function AuthScreen({ onScanQR }: { onScanQR: () => void }) {
                         <Text style={{ color: colors.deep, fontWeight: '700' }}>{show ? 'Ocultar contraseña' : 'Mostrar contraseña'}</Text>
                     </Pressable>
                     <Notice text={error} />
-                    <Action title={busy ? 'Procesando…' : register ? 'Crear cuenta' : 'Ingresar'} busy={busy} onPress={submit} />
+                    <Action title={busy ? 'Procesando…' : register ? 'Crear cuenta' : 'Ingresar'} busy={busy} disabled={!branches.length||!!branchError} onPress={submit} />
                     <Action title={register ? 'Volver a ingresar' : 'Crear usuario'} secondary disabled={busy} onPress={() => {
                         setRegister(!register); setValues({ ...emptyAuthValues, username: values.username }); setTouched({}); setError(''); setShow(false);
                     }} />
