@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Image, Text, TextInput, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Crypto from 'expo-crypto';
-import { supabase } from './api';
+import { supabase, money } from './api';
 import { secureStorage } from './secureStorage';
 import { type Branch } from './branches';
 import { countBarcode, definitiveCountError, type CountSummary, type CountItem, type CountOperation } from './counting';
@@ -63,7 +63,7 @@ export function InventoryCountScreen({userId,branch,active,onBack}:{userId:strin
  </View>;
  return <View style={{flex:1}}><FlatList data={finished?rows:[]} keyExtractor={item=>item.jewelry_id} keyboardShouldPersistTaps="handled" contentContainerStyle={s.content} ListHeaderComponent={header}
  ListEmptyComponent={finished?<Text style={s.text}>{pageLoading?'Cargando faltantes…':pageError?'':summary.missing_products===0?'No se encontraron productos faltantes.':''}</Text>:null}
- renderItem={({item})=><View style={s.card}><CountPhoto path={item.image_path}/><Text style={s.productName}>{item.description}</Text><Text style={s.uid}>Certificado · {item.barcode||'Sin certificado'}</Text><Text style={s.text}>Cantidad contada: {item.counted} · Stock: {item.stock}</Text><Text style={s.price}>Cantidad faltante: {item.missing}</Text>{item.barcode?<Action title="Ver certificado completo" secondary onPress={()=>setCertificate(item.jewelry_id)}/>:null}</View>}
+ renderItem={({item})=><View style={s.card}><CountPhoto path={item.image_path}/><Text style={s.productName}>{item.description}</Text><Text style={s.price}>Precio actual: {item.price == null ? 'No disponible' : money(item.price)}</Text><Text style={s.uid}>Certificado · {item.barcode||'Sin certificado'}</Text><Text style={s.text}>Cantidad contada: {item.counted} · Stock: {item.stock}</Text><Text style={s.price}>Cantidad faltante: {item.missing}</Text>{item.barcode?<Action title="Ver certificado completo" secondary onPress={()=>setCertificate(item.jewelry_id)}/>:null}</View>}
  ListFooterComponent={finished&&summary.missing_products>0?<View style={s.row}><Action title="Anterior" secondary disabled={page===0||pageLoading} onPress={()=>setPage(v=>v-1)}/><Text style={s.text}>Página {page+1} de {Math.ceil(summary.missing_products/15)}</Text><Action title="Siguiente" secondary disabled={pageLoading||(page+1)*15>=summary.missing_products} onPress={()=>setPage(v=>v+1)}/></View>:null}/>
  {certificate?<CertificateModal id={certificate} active={active} onClose={()=>setCertificate(null)} closeLabel="Volver a productos faltantes"/>:null}</View>;
 }

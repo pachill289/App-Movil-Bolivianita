@@ -110,6 +110,14 @@ Una exportación Metro valida los bundles, pero no sustituye un build nativo fir
 
 ## Referencias
 
+### Precios y búsqueda móvil (19/10/2026)
+
+El inventario permite seleccionar un precio único de los productos con stock de la sucursal o introducirlo manualmente (punto o coma decimal) y pulsar **Filtrar**. **Todos los precios** elimina ese filtro. La búsqueda admite descripción, UID y código de barras completo, combinados con el precio exacto y paginación de 15 productos.
+
+Los faltantes muestran el **precio actual** del producto en BOB, no un precio histórico del conteo. Si el producto fue eliminado o trasladado a otra sucursal, se muestra **No disponible**. El reporte sigue siendo exclusivo del administrador y no modifica stock ni ventas.
+
+Requiere `20261019020000_mobile_price_filters.sql` del repositorio web (ya aplicada al Supabase compartido) y una nueva APK. Verificado con TypeScript, pruebas móviles y exportación Android/iOS; falta comprobación visual en teléfono físico.
+
 - https://docs.expo.dev/build/setup/
 - https://docs.expo.dev/versions/latest/sdk/camera/
 - https://docs.expo.dev/versions/latest/sdk/securestore/

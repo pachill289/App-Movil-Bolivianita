@@ -34,6 +34,7 @@ export type Product = {
     price: number | null;
     stock: number;
     has_certificate?: boolean;
+    image_path?: string | null;
 };
 export type Candidate = Product & {
     price: number;
@@ -62,9 +63,9 @@ export type Receipt = {
     currency: string;
     total_amount: number;
 };
-export type InventoryPage = { rows: Product[]; count: number; products: number; units: number; empty: number };
-export async function inventory(page=0,search=''): Promise<InventoryPage> {
- const {data,error}=await supabase.rpc('jewelry_mobile_inventory_page',{p_search:search,p_stock:'all',p_offset:page*15,p_limit:15});
+export type InventoryPage = { rows: Product[]; count: number; products: number; units: number; empty: number; prices: number[] };
+export async function inventory(page=0,search='',price:number|null=null): Promise<InventoryPage> {
+ const {data,error}=await supabase.rpc('jewelry_mobile_inventory_filtered',{p_price:price,p_search:search,p_stock:'all',p_offset:page*15,p_limit:15});
  if(error)throw error;return data;
 }
 export async function lookup(target: ScanTarget): Promise<Candidate> {
