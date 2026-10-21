@@ -112,6 +112,10 @@ Una exportación Metro valida los bundles, pero no sustituye un build nativo fir
 
 ### Precios y búsqueda móvil (19/10/2026)
 
+Actualización del 21/10/2026: cada código se cuenta **una sola vez por conteo**, incluso con stock mayor que uno; suma una unidad y una segunda lectura se rechaza en servidor. Reintentar una lectura pendiente no la duplica. Deshacer permite volver a escanear. Esta regla reemplaza el escaneo por cada unidad descrito anteriormente; no recalcula conteos previos.
+
+Administradores y vendedores pueden activar **Agregar comisión de guía** en el pago e introducir un porcentaje de 0 a 100 (hasta dos decimales). Se calcula después del 1,5 % de tarjeta, si corresponde. La pantalla muestra la comisión y el neto antes de confirmar; el comprobante conserva ambos. Por ejemplo, Bs 250 con tarjeta y 10 % de guía: tarjeta Bs 3,75, guía Bs 24,63 y neto Bs 221,62. La operación pendiente guarda el porcentaje para reintentos seguros. Requiere `20261021010000_guide_commission_unique_count.sql` y una nueva APK.
+
 El inventario permite seleccionar un precio único de los productos con stock de la sucursal o introducirlo manualmente (punto o coma decimal) y pulsar **Filtrar**. **Todos los precios** elimina ese filtro. La búsqueda admite descripción, UID y código de barras completo, combinados con el precio exacto y paginación de 15 productos.
 
 Los faltantes muestran el **precio actual** del producto en BOB, no un precio histórico del conteo. Si el producto fue eliminado o trasladado a otra sucursal, se muestra **No disponible**. El reporte sigue siendo exclusivo del administrador y no modifica stock ni ventas.

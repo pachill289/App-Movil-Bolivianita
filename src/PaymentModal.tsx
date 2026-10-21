@@ -1,11 +1,11 @@
-import React from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Modal, Pressable, ScrollView, Text, TextInput, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Action, colors, s } from './ui';
 import { PAYMENT_METHODS, type PaymentMethod } from './payments';
 import { money, type Candidate } from './api';
 import { transactionLabels } from './transactionLabels';
-import { saleAmounts } from './saleAmounts';
+import { guideAmounts, guidePercent } from './guideCommission';
 
 type Props = {
   role: 'admin' | 'collaborator' | 'seller';
@@ -16,11 +16,15 @@ type Props = {
   legacyPending: boolean;
   onSelect: (method: PaymentMethod) => void;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (percent:number) => void;
 };
 export function PaymentModal({ role, visible, product, selected, busy, legacyPending, onSelect, onClose, onConfirm }: Props) {
   const labels = transactionLabels(role);
-  const amounts = saleAmounts(product?.price ?? 0, selected, role);
+  const [guide,setGuide]=useState(false),[percentText,setPercentText]=useState('');
+  useEffect(()=>{if(visible){setGuide(false);setPercentText('');}},[visible]);
+  const staff=role==='admin'||role==='seller';
+  const percent=guide&&staff&&!legacyPending?guidePercent(percentText):0;
+  const amounts=percent===null?null:guideAmounts(product?.price??0,selected,role,percent);
   return <Modal visible={visible} transparent animationType="fade" onRequestClose={() => { if (!busy) onClose(); }}>
     <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(35,18,34,0.6)' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
@@ -44,8 +48,10 @@ export function PaymentModal({ role, visible, product, selected, busy, legacyPen
               <Text style={[s.productName, { flex: 1, fontSize: 15 }]}>{method.label}</Text>
             </Pressable>)}
           </View>
+          {staff&&!legacyPending?<View style={{gap:10}}><View style={s.row}><Text style={s.text}>Agregar comisión de guía</Text><Switch accessibilityLabel="Agregar comisión de guía" value={guide} disabled={busy} onValueChange={setGuide}/></View>{guide?<><TextInput accessibilityLabel="Porcentaje de comisión de guía" style={s.input} keyboardType="decimal-pad" editable={!busy} placeholder="Porcentaje (0 a 100)" value={percentText} onChangeText={setPercentText}/><Text style={s.text}>Se calcula sobre el monto después de descontar la tarjeta, si corresponde.</Text>{percent===null?<Text style={{color:colors.red}}>Ingresa un porcentaje de 0 a 100 con hasta dos decimales.</Text>:null}</>:null}</View>:null}
           {amounts?.applies ? <Text style={s.text}>Monto original: {money(amounts.gross)} · Deducción por tarjeta (1,5 %): {money(amounts.fee)} · Monto unitario neto a registrar: {money(amounts.net)}</Text> : null}
-          <Action title={busy ? labels.progress : labels.action} busy={busy} disabled={!selected} onPress={onConfirm} />
+          {amounts?<Text style={s.text}>Comisión de guía ({percent}%): {money(amounts.commission)} · Venta neta: {money(amounts.net)}</Text>:null}
+          <Action title={busy ? labels.progress : labels.action} busy={busy} disabled={!selected||!amounts} onPress={()=>{if(percent!==null)onConfirm(percent);}} />
           <Action title="Cancelar" secondary disabled={busy} onPress={onClose} />
         </View>
       </ScrollView>
