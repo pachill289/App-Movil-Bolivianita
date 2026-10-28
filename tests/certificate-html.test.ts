@@ -13,6 +13,8 @@ test('both original templates are available; QR must match the current certifica
     const first = certificateHtml(record, 'https://example.test/photo.webp');
     const second = certificateHtml({ ...record, template: 'certificado-oficial-2' }, 'https://example.test/photo.webp');
     assert.notEqual(first, second);
-    assert.equal(first, certificateHtml({ ...record, template: 'unknown' }, 'https://example.test/photo.webp'));
+    assert.throws(()=>certificateHtml({ ...record, template: 'unknown' }, 'https://example.test/photo.webp'));
+    assert.notEqual(first,certificateHtml({...record,template:'certificado-oficial-3'},'https://example.test/photo.webp'));
+    assert.ok(certificateHtml({...record,template:'custom-template'},'https://example.test/photo.webp',undefined,'https://example.test/template.webp').includes('https://example.test/template.webp'));
     assert.throws(() => certificateHtml(record, 'https://example.test/photo.webp', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'));
 });

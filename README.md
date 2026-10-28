@@ -78,6 +78,10 @@ La actualización de acceso pasó la comprobación TypeScript, las pruebas autom
 
 ## Builds
 
+Actualización 28/10/2026: los escáneres de venta, Visor QR desde login y conteo incluyen **− Zoom**, **+ Zoom** y **Restablecer**. El valor normalizado de cámara va de 0 a 100 % (no representa aumentos ópticos); se conserva entre lecturas mientras la pantalla permanece abierta. Comprobar enfoque y zoom en el teléfono final.
+
+Admin/vendedor dispone de **Ajuste de precio** al inicio del modal de pago. El monto positivo admite dos decimales; tarjeta y comisión de guía se calculan sobre ese monto. El precio de catálogo y el monto vendido se guardan por separado, sin editar el catálogo. Los reintentos conservan el ajuste. Requiere la migración compartida `20261028010000_adjusted_mobile_sale.sql` y una nueva APK. El visor también corrige el recuadro de foto específico de Citrino.
+
 ## Sucursales y conteo de inventario (16/10/2026)
 
 El login permite elegir sucursal y el inventario permite cambiar entre las autorizadas. La sucursal inicial es **Joyería Bolivianita La Paz**. Los administradores acceden a todas; vendedores y colaboradores requieren asignación administrativa. El inventario se consulta en páginas de 15 productos.
@@ -132,6 +136,8 @@ Requiere `20261019020000_mobile_price_filters.sql` del repositorio web (ya aplic
 La migración compartida `20260924020000_customer_purchases.sql`, versionada en el repositorio web, habilita los precios y la compra para perfiles colaboradores existentes y nuevos. Debe aplicarse después de la migración web de usuarios 2.1; no volver a ejecutar migraciones históricas para activar este cambio. Mantiene la edición del inventario y los reportes solo para administradores. La operación usa el precio persistido, valida la versión del certificado, exige stock y método de pago y conserva la protección contra reintentos duplicados. `seller_id` identifica a quien confirma la operación, incluido el cliente que compra. El método de pago es un registro; no hay pasarela ni cobro automático.
 
 ## Plantillas del certificado y verificación visual
+
+Desde el 23/10/2026 el visor incorpora **Plantilla Citrino** y consulta los fondos personalizados del catálogo compartido `jewelry_certificate_templates`. Los certificados continúan protegidos por la sesión habitual o el permiso Visor QR. Si falta una plantilla, se muestra un error en lugar de sustituirla por Amatista. Reconstruir la APK para esta compatibilidad. La administración de plantillas permanece en el sistema web.
 
 El visor utiliza `react-native-webview` con HTML local y `src/certificate-assets.json`: plantillas JPEG, CSS, fuentes Roboto Mono y codificadores QR/CODE128 del sistema web. No carga páginas ni scripts remotos; la fotografía procede del Storage configurado. Para actualizar las plantillas desde el repositorio web vecino:
 

@@ -8,7 +8,7 @@ const requireWeb = createRequire(resolve(web, 'package.json'));
 const { build } = createRequire(requireWeb.resolve('vite'))('esbuild');
 const read64 = async path => (await readFile(path)).toString('base64');
 const templates = {};
-for (const id of ['certificado-oficial', 'certificado-oficial-2']) {
+for (const id of ['certificado-oficial', 'certificado-oficial-2', 'certificado-oficial-3']) {
     templates[id] = `data:image/jpeg;base64,${await read64(resolve(web, 'public', `${id}.jpeg`))}`;
 }
 const styles = (await readFile(resolve(web, 'src/styles/app.css'), 'utf8')).split(/\r?\n/)

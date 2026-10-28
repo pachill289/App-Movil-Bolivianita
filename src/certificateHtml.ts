@@ -7,10 +7,12 @@ export type CertificateRecord = {
 };
 // Escape script-closing tags and Unicode separators in data, never interpolate HTML fields.
 const scriptJSON = (value: unknown) => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-export function certificateHtml(record: CertificateRecord, photo: string, qrValue?: string): string {
+export function certificateHtml(record: CertificateRecord, photo: string, qrValue?: string, backgroundUrl?: string): string {
     if (qrValue && parseCertificateQR(qrValue) !== record.jewelry_id.toLowerCase()) throw new Error('El QR no corresponde al certificado.');
-    const template = record.template === 'certificado-oficial-2' ? 'certificado-oficial-2' : 'certificado-oficial';
-    const payload = { record: { ...record, template }, photo, qrValue: qrValue || record.jewelry_id, background: assets.templates[template] };
+    const template = record.template || 'certificado-oficial';
+    const background = backgroundUrl || (assets.templates as Record<string,string>)[template];
+    if(!background)throw new Error('Plantilla del certificado no disponible.');
+    const payload = { record: { ...record, template }, photo, qrValue: qrValue || record.jewelry_id, background };
     return `<!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=1050, maximum-scale=4, user-scalable=yes">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: https:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'">
@@ -19,6 +21,7 @@ export function certificateHtml(record: CertificateRecord, photo: string, qrValu
 @font-face{font-family:'Roboto Mono';font-weight:700;src:url('${assets.fonts['700']}')}
 *{box-sizing:border-box}body{margin:0;background:#fbf8fa}
 ${assets.styles}
+${template==='certificado-oficial-3'?'.photo-overlay{left:47px;top:198px;width:217px;height:210px}':''}
 .certificate{box-shadow:none}
 </style></head><body>
 <div class="certificate" role="img" aria-label="Certificado de autenticidad">

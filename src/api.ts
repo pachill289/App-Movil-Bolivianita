@@ -49,6 +49,7 @@ export type PendingSale = {
     // Optional only for pending operations saved by the previous app version.
     paymentMethod?: PaymentMethod;
     guidePercent?: number;
+    saleAmount?: number;
 };
 export type Receipt = {
     request_id: string;
@@ -76,7 +77,8 @@ export async function lookup(target: ScanTarget): Promise<Candidate> {
 }
 export async function sell(sale: PendingSale): Promise<Receipt> {
     if (!isPaymentMethod(sale.paymentMethod)) throw new Error('Selecciona un tipo de pago válido.');
-    const { data, error } = await supabase.rpc(sale.guidePercent === undefined ? 'register_certificate_sale' : 'register_certificate_sale_guided', {
+    const { data, error } = await supabase.rpc(sale.saleAmount !== undefined ? 'register_certificate_sale_adjusted' : sale.guidePercent === undefined ? 'register_certificate_sale' : 'register_certificate_sale_guided', {
+        ...(sale.saleAmount === undefined ? {} : {p_sale_amount:sale.saleAmount}),
         ...(sale.guidePercent === undefined ? {} : {p_guide_percent:sale.guidePercent}),
         p_request_id: sale.requestId, p_jewelry_id: sale.product.id,
         p_expected_price: sale.product.price, p_certificate_version: sale.product.version,

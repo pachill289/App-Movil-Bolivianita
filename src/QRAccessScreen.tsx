@@ -1,3 +1,4 @@
+import { CameraZoom } from './CameraZoom';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Linking, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -8,6 +9,7 @@ import { CertificateModal } from './CertificateModal';
 import { Action, Brand, Notice, s } from './ui';
 
 export function QRAccessScreen({ active, onBack }: { active: boolean; onBack: () => void }) {
+ const [zoom,setZoom]=useState(0);
     const [permission, requestPermission] = useCameraPermissions();
     const [scanning, setScanning] = useState(false), [manual, setManual] = useState('');
     const [id, setId] = useState(''), [qr, setQR] = useState('');
@@ -60,7 +62,7 @@ export function QRAccessScreen({ active, onBack }: { active: boolean; onBack: ()
                 <Action title="Ver certificado" busy={busy} disabled={!username.trim() || !password} onPress={() => void login()} />
                 <Action title="Escanear otra joya" secondary disabled={busy} onPress={() => { scanGuard.current = false; setId(''); setPassword(''); setError(''); }} />
             </View> : <View style={s.card}>
-                {scanning && active ? <><CameraView style={{ height: 300, borderRadius: 16 }} facing="back" barcodeScannerSettings={{ barcodeTypes: ['qr'] }} onBarcodeScanned={({ data }) => select(data)} /><Action title="Cancelar escaneo" secondary onPress={() => setScanning(false)} /></> : <Action title="Abrir cámara y escanear QR" onPress={() => void start()} />}
+                {scanning && active ? <><CameraView zoom={zoom} style={{ height: 300, borderRadius: 16 }} facing="back" barcodeScannerSettings={{ barcodeTypes: ['qr'] }} onBarcodeScanned={({ data }) => select(data)} /><CameraZoom value={zoom} onChange={setZoom}/><Action title="Cancelar escaneo" secondary onPress={() => setScanning(false)} /></> : <Action title="Abrir cámara y escanear QR" onPress={() => void start()} />}
                 {permission && !permission.granted && !permission.canAskAgain ? <Action title="Abrir ajustes de cámara" secondary onPress={() => void Linking.openSettings()} /> : null}
                 <Text style={s.label}>Enlace del certificado</Text><TextInput accessibilityLabel="Enlace del certificado" style={s.input} value={manual} onChangeText={setManual} autoCapitalize="none" autoCorrect={false} placeholder="https://bolivianita.org/certificado/…" onSubmitEditing={() => select(manual)} />
                 <Action title="Continuar" secondary disabled={!manual.trim()} onPress={() => select(manual)} />

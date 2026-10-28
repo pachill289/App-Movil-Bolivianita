@@ -14,12 +14,19 @@ export function CertificateModal({ id, active, onClose, qrValue, closeLabel = 'V
 }) {
     const [record, setRecord] = useState<CertificateRecord | null>(null);
     const [photo, setPhoto] = useState('');
+    const [background,setBackground]=useState<string|undefined>();
     const [loading, setLoading] = useState(true), [error, setError] = useState(''), [attempt, setAttempt] = useState(0);
     useEffect(() => {
         let mounted = true;
         setLoading(true); setError(''); setRecord(null);
         if (!active) return;
         let reading = false;
+        const resolveBackground=async(template?:string)=>{
+            if(!template||['certificado-oficial','certificado-oficial-2','certificado-oficial-3'].includes(template))return undefined;
+            const {data,error}=await supabase.from('jewelry_certificate_templates').select('asset_path').eq('id',template).single();
+            if(error||!data)throw new Error('No se pudo cargar la plantilla del certificado.');
+            return supabase.storage.from('certificate-templates').getPublicUrl(data.asset_path).data.publicUrl;
+        };
         const read = async () => {
             if (reading) return;
             reading = true;
@@ -27,7 +34,8 @@ export function CertificateModal({ id, active, onClose, qrValue, closeLabel = 'V
                 if (viewerGrant) {
                     if (viewerGrant.certificate_id !== id) throw new QRAccessError('El permiso no corresponde al certificado.', 401);
                     const data = await readQR(supabase, viewerGrant);
-                    if (mounted) { setPhoto(data.image_url); setRecord(data.certificate); }
+                    const background=await resolveBackground(data.certificate.template);
+                    if (mounted) { setBackground(background);setPhoto(data.image_url); setRecord(data.certificate); }
                     return;
                 }
                 const { data, error } = await supabase.rpc('get_jewelry_certificate', { p_jewelry_id: id }).maybeSingle<CertificateRecord>();
@@ -35,7 +43,8 @@ export function CertificateModal({ id, active, onClose, qrValue, closeLabel = 'V
                 if (!data) throw new Error('Esta joya todavía no tiene un certificado publicado.');
                 const image = await supabase.storage.from('certificate-images').createSignedUrl(data.image_path, 900);
                 if (image.error || !image.data) throw new Error('No se pudo cargar la fotografía del certificado.');
-                if (mounted) { setPhoto(image.data.signedUrl); setRecord(data); }
+                const background=await resolveBackground(data.template);
+                if (mounted) { setBackground(background);setPhoto(image.data.signedUrl); setRecord(data); }
             } catch (failure) {
                 if (mounted) {
                     setRecord(null); setError(failure instanceof Error ? failure.message : 'No se pudo consultar el certificado.'); setLoading(false);
@@ -55,8 +64,8 @@ export function CertificateModal({ id, active, onClose, qrValue, closeLabel = 'V
         if (!record) return undefined;
         const base = Constants.expoConfig?.extra?.certificateBaseUrl as string | undefined;
         const value = qrValue || (base ? `${base.replace(/\/$/, '')}/certificado/${id}` : id);
-        return { html: certificateHtml(record, photo, value) };
-    }, [record, id, qrValue, photo]);
+        return { html: certificateHtml(record, photo, value,background) };
+    }, [record, id, qrValue, photo,background]);
     useEffect(() => {
         if (!loading || !record) return;
         const timer = setTimeout(() => { setLoading(false); setError('El certificado tardó demasiado en cargar. Revisa tu conexión y reintenta.'); }, 25000);
